@@ -1,4 +1,5 @@
-For support, please visit: https://www.reddit.com/r/Nuvio/comments/1ubfa00/kaoxt_collection_v10/
+For support, please visit: https://discord.com/channels/1379902184207941732/1523565162454450256
+Tag me: @Kaoxt
 
 Suggestions or Bug Fixes: https://tally.so/r/684OPN
 
