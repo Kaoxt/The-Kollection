@@ -2,7 +2,7 @@ For support, please visit: https://discord.com/channels/1379902184207941732/1523
 
 Tag me: @Kaoxt
 
-Suggestions or Bug Fixes: https://tally.so/r/684OPN
+Suggestions or Bug Fixes: DM on Discord
 
 Here is the categorized list of all the content "folders" (catalogs and collections):
 ### Discover
