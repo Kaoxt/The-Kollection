@@ -1,0 +1,58 @@
+name: Sync Kollection Runtime
+
+on:
+  push:
+    paths:
+      - '.github/workflows/sync-kollection-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download current runtime assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p runtime
+
+          curl -fL --retry 3 --retry-delay 2             'https://raw.githubusercontent.com/ImKaptain/Kaptain-Collection/main/collections/database.kaoxt.js'             -o runtime/database.kaoxt.js
+
+          curl -fL --retry 3 --retry-delay 2             'https://raw.githubusercontent.com/ImKaptain/Kaptain-Collection/main/collections/kaoxt-aio-catalogs.json'             -o runtime/kaoxt-aio-catalogs.json
+
+          curl -fL --retry 3 --retry-delay 2             'https://raw.githubusercontent.com/ImKaptain/Kaptain-Collection/main/collections/kaoxt-aio-base-config.json'             -o runtime/kaoxt-aio-base-config.json
+
+      - name: Validate runtime assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s runtime/database.kaoxt.js
+          test -s runtime/kaoxt-aio-catalogs.json
+          test -s runtime/kaoxt-aio-base-config.json
+          grep -q 'window.NUVIO_DATABASE' runtime/database.kaoxt.js
+          python -m json.tool runtime/kaoxt-aio-catalogs.json >/dev/null
+          python -m json.tool runtime/kaoxt-aio-base-config.json >/dev/null
+
+      - name: Commit runtime assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add runtime/database.kaoxt.js runtime/kaoxt-aio-catalogs.json runtime/kaoxt-aio-base-config.json
+
+          if git diff --cached --quiet; then
+            echo 'Runtime assets are already current.'
+            exit 0
+          fi
+
+          git commit -m 'Sync Kollection runtime assets'
+          git push
