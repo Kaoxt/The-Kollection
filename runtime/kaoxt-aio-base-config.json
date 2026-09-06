@@ -1,0 +1,218 @@
+{
+  "language": "en-US",
+  "includeAdult": false,
+  "blurThumbs": false,
+  "showPrefix": false,
+  "showMetaProviderAttribution": false,
+  "castCount": 10,
+  "sfw": false,
+  "hideUnreleasedDigital": false,
+  "providers": {
+    "movie": "imdb",
+    "series": "tvdb",
+    "anime": "mal",
+    "anime_id_provider": "imdb",
+    "forceAnimeForDetectedImdb": false
+  },
+  "artProviders": {
+    "movie": {
+      "poster": "tmdb",
+      "background": "tmdb",
+      "logo": "tmdb"
+    },
+    "series": {
+      "poster": "tmdb",
+      "background": "tmdb",
+      "logo": "tmdb"
+    },
+    "anime": {
+      "poster": "imdb",
+      "background": "imdb",
+      "logo": "imdb"
+    },
+    "englishArtOnly": false
+  },
+  "tvdbSeasonType": "default",
+  "mal": {
+    "skipFiller": false,
+    "skipRecap": false,
+    "allowEpisodeMarking": false,
+    "useImdbIdForCatalogAndSearch": false
+  },
+  "tmdb": {
+    "scrapeImdb": true
+  },
+  "apiKeys": {
+    "gemini": "",
+    "tmdb": "",
+    "tvdb": "",
+    "fanart": "",
+    "rpdb": "",
+    "topPoster": "",
+    "mdblist": "",
+    "openrouter": "",
+    "traktTokenId": "",
+    "simklTokenId": "",
+    "anilistTokenId": "",
+    "customDescriptionBlurb": ""
+  },
+  "ageRating": "None",
+  "searchEnabled": true,
+  "search": {
+    "enabled": true,
+    "ai_enabled": false,
+    "providers": {
+      "movie": "tmdb.search",
+      "series": "tvdb.search",
+      "anime_movie": "kitsu.search.movie",
+      "anime_series": "kitsu.search.series"
+    },
+    "engineEnabled": {
+      "tmdb.search": true,
+      "tvdb.search": true,
+      "tvdb.collections.search": false,
+      "tvmaze.search": true,
+      "mal.search.movie": false,
+      "mal.search.series": false,
+      "gemini.search": false,
+      "tmdb.people.search": false
+    },
+    "ai_provider": "gemini",
+    "ai_model": "gemini-2.5-flash-lite",
+    "searchOrder": [
+      "gemini.search",
+      "series",
+      "people_search_movie",
+      "people_search_series",
+      "movie",
+      "tvdb.collections.search",
+      "anime_series",
+      "anime_movie"
+    ]
+  },
+  "streaming": [
+    "nfx",
+    "hbm",
+    "dnp",
+    "amp",
+    "atp",
+    "pmp",
+    "pcp",
+    "hlu",
+    "cru",
+    "dpe",
+    "mub"
+  ],
+  "lastModified": 1786159542412,
+  "configVersion": 1786159542413,
+  "catalogSetupComplete": true,
+  "showDisabledCatalogs": false,
+  "hideUnreleasedDigitalSearch": false,
+  "configHash": "59b83c90d5eb1346",
+  "timezone": "America/Chicago",
+  "customPosterUrlPattern": "",
+  "tags": [
+    {
+      "name": "Netflix",
+      "color": "red"
+    },
+    {
+      "name": "Discover",
+      "color": "indigo"
+    },
+    {
+      "name": "Disney+",
+      "color": "blue"
+    },
+    {
+      "name": "Apple TV",
+      "color": "slate"
+    },
+    {
+      "name": "HBO Max",
+      "color": "violet"
+    },
+    {
+      "name": "Prime Video",
+      "color": "blue"
+    },
+    {
+      "name": "Paramount+",
+      "color": "blue"
+    },
+    {
+      "name": "Hulu",
+      "color": "green"
+    },
+    {
+      "name": "Peacock",
+      "color": "amber"
+    },
+    {
+      "name": "Crunchyroll",
+      "color": "orange"
+    },
+    {
+      "name": "Directors",
+      "color": "slate"
+    },
+    {
+      "name": "Decades",
+      "color": "cyan"
+    },
+    {
+      "name": "Genres",
+      "color": "pink"
+    },
+    {
+      "name": "Studios",
+      "color": "red"
+    },
+    {
+      "name": "Franchises",
+      "color": "indigo"
+    },
+    {
+      "name": "Actors",
+      "color": "amber"
+    },
+    {
+      "name": "Discovery+",
+      "color": "slate"
+    },
+    {
+      "name": "Awards & Festivals",
+      "color": "amber"
+    },
+    {
+      "name": "Holiday",
+      "color": "red"
+    },
+    {
+      "name": "Based On...",
+      "color": "cyan"
+    },
+    {
+      "name": "Anime",
+      "color": "red"
+    },
+    {
+      "name": "Shudder",
+      "color": "red"
+    },
+    {
+      "name": "Mubi",
+      "color": "indigo"
+    },
+    {
+      "name": "Networks",
+      "color": "cyan"
+    },
+    {
+      "name": "Streaming",
+      "color": "cyan"
+    }
+  ],
+  "catalogModeOnly": false,
+  "posterRatingProvider": "none"
+}
