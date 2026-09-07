@@ -1,0 +1,66 @@
+name: Sync Kollection Images to Cloudflare R2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "images/**"
+      - ".github/workflows/sync-images-to-r2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kollection-r2-image-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync images to R2
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Ensure AWS CLI is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v aws >/dev/null 2>&1; then
+            python3 -m pip install --user awscli
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Verify required secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID" || (echo "Missing R2_ACCESS_KEY_ID" && exit 1)
+          test -n "$AWS_SECRET_ACCESS_KEY" || (echo "Missing R2_SECRET_ACCESS_KEY" && exit 1)
+          test -n "$R2_ENDPOINT" || (echo "Missing R2_ENDPOINT" && exit 1)
+          test -n "$R2_BUCKET" || (echo "Missing R2_BUCKET" && exit 1)
+
+      - name: Sync images folder to Cloudflare R2
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws s3 sync "images/" "s3://${R2_BUCKET}/images/" \
+            --endpoint-url "${R2_ENDPOINT}" \
+            --region auto \
+            --delete \
+            --only-show-errors
+
+      - name: Show sync result
+        shell: bash
+        run: |
+          echo "Synced GitHub images/ to R2 bucket: ${R2_BUCKET}/images/"
