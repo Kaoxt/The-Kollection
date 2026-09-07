@@ -1,0 +1,100 @@
+name: Import Collection Artwork ZIPs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'uploads/**/*.zip'
+      - 'uploads/*.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-artwork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Import uploaded ZIP files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          shopt -s nullglob globstar
+          zip_files=(uploads/*.zip uploads/**/*.zip)
+
+          declare -A seen=()
+          unique_zips=()
+          for zip_path in "${zip_files[@]}"; do
+            if [[ -f "$zip_path" && -z "${seen[$zip_path]:-}" ]]; then
+              seen[$zip_path]=1
+              unique_zips+=("$zip_path")
+            fi
+          done
+
+          if [[ ${#unique_zips[@]} -eq 0 ]]; then
+            echo "No ZIP files found in uploads/."
+            exit 0
+          fi
+
+          mkdir -p images
+
+          for zip_path in "${unique_zips[@]}"; do
+            echo "Importing $zip_path"
+            temp_dir="$(mktemp -d)"
+
+            ZIP_PATH="$zip_path" TEMP_DIR="$temp_dir" python3 <<'PY'
+          import os
+          import shutil
+          import zipfile
+          from pathlib import Path, PurePosixPath
+
+          zip_path = Path(os.environ["ZIP_PATH"])
+          temp_dir = Path(os.environ["TEMP_DIR"])
+
+          with zipfile.ZipFile(zip_path) as archive:
+              for member in archive.infolist():
+                  name = member.filename.replace("\\", "/")
+                  path = PurePosixPath(name)
+                  if path.is_absolute() or ".." in path.parts:
+                      raise SystemExit(f"Unsafe path in {zip_path}: {member.filename}")
+              archive.extractall(temp_dir)
+
+          shutil.rmtree(temp_dir / "__MACOSX", ignore_errors=True)
+          for junk in temp_dir.rglob(".DS_Store"):
+              junk.unlink(missing_ok=True)
+          PY
+
+            if [[ -d "$temp_dir/images" ]]; then
+              cp -a "$temp_dir/images/." images/
+            else
+              cp -a "$temp_dir/." images/
+            fi
+
+            rm -rf "$temp_dir"
+            rm -f "$zip_path"
+          done
+
+      - name: Commit imported artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images uploads
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "Import collection artwork"
+          git push origin HEAD:main
