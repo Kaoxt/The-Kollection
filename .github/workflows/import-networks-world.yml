@@ -1,0 +1,182 @@
+name: Import Networks and World Artwork
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/import-networks-world.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-artwork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Networks and World artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY'
+          from pathlib import Path
+          from urllib.parse import quote
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError, URLError
+          import time
+
+          BASES = [
+              "https://kao-xt.com",
+              "https://ka-oxtz.com",
+              "https://ka-oxt.com",
+          ]
+
+          NETWORKS = [
+              "Networks/NBC/logo.webp",
+              "Networks/NBC/backdrop.webp",
+              "Networks/NBC/cover.webp",
+              "Networks/ABC/logo.webp",
+              "Networks/ABC/cover.webp",
+              "Networks/ABC/backdrop.webp",
+              "Networks/CBS/cover2.webp",
+              "Networks/CBS/cover.webp",
+              "Networks/CBS/logo.webp",
+              "Networks/CBS/backdrop.webp",
+              "Networks/Fox/cover2.webp",
+              "Networks/Fox/cover.webp",
+              "Networks/Fox/logo.webp",
+              "Networks/FX/cover.webp",
+              "Networks/FX/logo.webp",
+              "Networks/BBC/cover.webp",
+              "Networks/BBC/logo.webp",
+              "Networks/Channel 4/cover.webp",
+              "Networks/Channel 4/logo.webp",
+              "Networks/USA/cover.webp",
+              "Networks/USA/logo.webp",
+              "Networks/TNT/cover.webp",
+              "Networks/TNT/logo.webp",
+              "Networks/Cartoon Network/cover.webp",
+              "Networks/Cartoon Network/logo.webp",
+              "Networks/Nickelodeon/cover.webp",
+              "Networks/Nickelodeon/logo.webp",
+              "Networks/SYFY/cover.webp",
+              "Networks/SYFY/logo.webp",
+              "Networks/CW/logo.webp",
+              "Networks/CW/cover.webp",
+              "Networks/TLC/logo.webp",
+              "Networks/TLC/cover.webp",
+              "Networks/Starz/cover.webp",
+              "Networks/Starz/logo.webp",
+              "Networks/MTV/logo.webp",
+              "Networks/MTV/cover.webp",
+              "Networks/Showtime/cover.webp",
+              "Networks/Showtime/logo.webp",
+              "Networks/PBS/logo.webp",
+              "Networks/PBS/cover.webp",
+              "Networks/History/cover.webp",
+              "Networks/History/logo.webp",
+              "Networks/HGTV/cover.webp",
+              "Networks/HGTV/logo.webp",
+              "Networks/Comedy Central/cover.webp",
+              "Networks/Comedy Central/logo.webp",
+              "Networks/Bravo/logo.webp",
+              "Networks/Bravo/cover.webp",
+              "Networks/AMC/cover2.webp",
+              "Networks/AMC/cover.webp",
+              "Networks/AMC/logo.webp",
+              "Networks/A&E/cover.webp",
+              "Networks/A&E/logo.webp",
+              "Networks/Adult Swim/cover.webp",
+              "Networks/Adult Swim/logo.webp",
+              "Networks/ESPN/cover.webp",
+              "Networks/ESPN/logo.webp",
+              "Networks/ESPN/backdrop.webp",
+              "Networks/National Geographic/cover.webp",
+              "Networks/National Geographic/logo.webp",
+              "Networks/HBO/logo.webp",
+              "Networks/HBO/cover.webp",
+              "Networks/Animal Planet/cover.webp",
+              "Networks/Animal Planet/logo.webp",
+              "Networks/Discovery/cover.webp",
+              "Networks/Discovery/logo.webp",
+          ]
+
+          WORLD = [
+              "World/Japan/cover.webp",
+              "World/South Korea/cover.webp",
+              "World/Brazil/cover.webp",
+              "World/China/cover.webp",
+              "World/USA/logo.webp",
+              "World/USA/backdrop.webp",
+              "World/USA/cover.webp",
+              "World/France/cover.webp",
+              "World/Mexico/cover.webp",
+              "World/Spain/cover.webp",
+              "World/United Kingdom/cover.webp",
+              "World/Germany/cover.webp",
+              "World/Argentina/cover.webp",
+              "World/India/cover.webp",
+              "World/Italy/cover.webp",
+              "World/Türkiye/cover.webp",
+              "World/Russia/cover.webp",
+              "World/Nordic/cover.webp",
+          ]
+
+          def is_webp(data):
+              return len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP"
+
+          def download(source_path, destination_path):
+              errors = []
+              for base in BASES:
+                  url = base.rstrip("/") + "/" + quote(source_path, safe="/")
+                  try:
+                      request = Request(url, headers={"User-Agent": "The-Kollection-Artwork-Migration/1.0"})
+                      with urlopen(request, timeout=45) as response:
+                          data = response.read()
+                      if not is_webp(data):
+                          raise ValueError(f"response was not WEBP ({len(data)} bytes)")
+                      destination_path.parent.mkdir(parents=True, exist_ok=True)
+                      destination_path.write_bytes(data)
+                      print(f"Downloaded {url} -> {destination_path} ({len(data)} bytes)")
+                      return
+                  except Exception as exc:
+                      errors.append(f"{url}: {exc}")
+                      time.sleep(0.2)
+              raise RuntimeError("Could not download " + source_path + "\n  " + "\n  ".join(errors))
+
+          for relative in NETWORKS:
+              download(relative, Path("images") / relative)
+
+          for relative in WORLD:
+              source = "International Cinema/" + relative.removeprefix("World/")
+              download(source, Path("images") / relative)
+
+          print(f"Imported {len(NETWORKS)} Networks files and {len(WORLD)} World files.")
+          PY
+
+      - name: Commit imported artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          rm -f .github/workflows/import-networks-world.yml
+          git add images .github/workflows/import-networks-world.yml
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "Import Networks and World artwork"
+          git push origin HEAD:main
