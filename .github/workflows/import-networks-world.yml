@@ -87,7 +87,6 @@ jobs:
               "Networks/Comedy Central/logo.webp",
               "Networks/Bravo/logo.webp",
               "Networks/Bravo/cover.webp",
-              "Networks/AMC/cover2.webp",
               "Networks/AMC/cover.webp",
               "Networks/AMC/logo.webp",
               "Networks/A&E/cover.webp",
@@ -151,7 +150,8 @@ jobs:
               raise RuntimeError("Could not download " + source_path + "\n  " + "\n  ".join(errors))
 
           for relative in NETWORKS:
-              download(relative, Path("images") / relative)
+              source = relative.replace("Networks/SYFY/", "Networks/Syfy/")
+              download(source, Path("images") / relative)
 
           for relative in WORLD:
               source = "International Cinema/" + relative.removeprefix("World/")
