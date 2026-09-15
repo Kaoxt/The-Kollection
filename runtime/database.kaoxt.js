@@ -5885,8 +5885,8 @@ window.NUVIO_DATABASE = [
         ],
         "hideTitle": true,
         "tileShape": "POSTER",
-        "titleLogoUrl": "https://kao-xt.com/Directors/Guillermo%20Del%20Toro/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Directors/Guillermo%20Del%20Toro/cover.webp",
+        "titleLogoUrl": "https://kollection.tv/images/Directors/Guillermo%20del%20Toro/logo.webp",
+        "coverImageUrl": "https://kollection.tv/images/Directors/Guillermo%20del%20Toro/cover.webp",
         "catalogSources": [
           {
             "type": "movie",
@@ -5896,7 +5896,7 @@ window.NUVIO_DATABASE = [
           }
         ],
         "focusGifEnabled": false,
-        "heroBackdropUrl": "https://kao-xt.com/Directors/Guillermo%20Del%20Toro/backdrop.webp"
+        "heroBackdropUrl": "https://kollection.tv/images/Directors/Guillermo%20del%20Toro/backdrop.webp"
       },
       {
         "id": "folder-8c39f57b",
