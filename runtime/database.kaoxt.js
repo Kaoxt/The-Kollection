@@ -5949,8 +5949,8 @@ window.NUVIO_DATABASE = [
         ],
         "hideTitle": true,
         "tileShape": "LANDSCAPE",
-        "titleLogoUrl": "https://kao-xt.com/Based%20On/True%20Events/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Based%20On/True%20Events/cover.webp",
+        "titleLogoUrl": "https://kollection.tv/images/Based%20On/True%20Stories/logo.webp",
+        "coverImageUrl": "https://kollection.tv/images/Based%20On/True%20Stories/cover.webp",
         "catalogSources": [
           {
             "type": "movie",
@@ -5960,7 +5960,7 @@ window.NUVIO_DATABASE = [
           }
         ],
         "focusGifEnabled": false,
-        "heroBackdropUrl": "https://kao-xt.com/Based%20On/True%20Events/backdrop.webp"
+        "heroBackdropUrl": "https://kollection.tv/images/Based%20On/True%20Stories/backdrop.webp"
       },
       {
         "id": "folder-77392d45",
