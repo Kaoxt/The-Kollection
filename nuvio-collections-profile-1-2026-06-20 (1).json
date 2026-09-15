@@ -3712,8 +3712,8 @@
         "coverEmoji": "",
         "focusGifUrl": "",
         "heroVideoUrl": "",
-        "titleLogoUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/cover.webp",
+        "titleLogoUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./logo.webp",
+        "coverImageUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./cover.webp",
         "catalogSources": [
           {
             "type": "Collection",
@@ -3723,7 +3723,7 @@
           }
         ],
         "focusGifEnabled": false,
-        "heroBackdropUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/backdrop.webp"
+        "heroBackdropUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./backdrop.webp"
       },
       {
         "id": "folder-dc9115b4",
