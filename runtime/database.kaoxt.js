@@ -4415,8 +4415,8 @@ window.NUVIO_DATABASE = [
         ],
         "hideTitle": true,
         "tileShape": "POSTER",
-        "titleLogoUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/cover.webp",
+        "titleLogoUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./logo.webp",
+        "coverImageUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./cover.webp",
         "catalogSources": [
           {
             "type": "all",
@@ -4426,7 +4426,7 @@ window.NUVIO_DATABASE = [
           }
         ],
         "focusGifEnabled": false,
-        "heroBackdropUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr/backdrop.webp"
+        "heroBackdropUrl": "https://kao-xt.com/Actors/Robert%20Downey%20Jr./backdrop.webp"
       },
       {
         "id": "folder-dc9115b4",
