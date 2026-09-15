@@ -210,8 +210,8 @@ window.NUVIO_DATABASE = [
         ],
         "hideTitle": true,
         "tileShape": "LANDSCAPE",
-        "titleLogoUrl": "https://kao-xt.com/Discover/Recommended%20For%20You/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Discover/Recommended%20For%20You/cover.webp",
+        "titleLogoUrl": "https://kao-xt.com/Discover/For%20You/logo.webp",
+        "coverImageUrl": "https://kao-xt.com/Discover/For%20You/cover.webp",
         "catalogSources": [
           {
             "type": "movie",
@@ -245,7 +245,7 @@ window.NUVIO_DATABASE = [
           }
         ],
         "focusGifEnabled": true,
-        "heroBackdropUrl": "https://kao-xt.com/Discover/Recommended%20For%20You/backdrop.webp"
+        "heroBackdropUrl": "https://kao-xt.com/Discover/For%20You/backdrop.webp"
       }
     ],
     "pinToTop": true,
