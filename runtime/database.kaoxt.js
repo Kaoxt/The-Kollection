@@ -3295,8 +3295,8 @@ window.NUVIO_DATABASE = [
         ],
         "hideTitle": true,
         "tileShape": "LANDSCAPE",
-        "titleLogoUrl": "https://kao-xt.com/Movie%20Collections/Jurassic%20Park/logo.webp",
-        "coverImageUrl": "https://kao-xt.com/Movie%20Collections/Jurassic%20Park/cover.webp",
+        "titleLogoUrl": "https://kollection.tv/images/Franchises/Jurrasic%20Park/logo.webp",
+        "coverImageUrl": "https://kollection.tv/images/Franchises/Jurrasic%20Park/cover.webp",
         "catalogSources": [
           {
             "type": "movie",
@@ -3306,7 +3306,7 @@ window.NUVIO_DATABASE = [
           }
         ],
         "focusGifEnabled": true,
-        "heroBackdropUrl": "https://kao-xt.com/Movie%20Collections/Jurassic%20Park/backdrop.webp"
+        "heroBackdropUrl": "https://kollection.tv/images/Franchises/Jurrasic%20Park/backdrop.webp"
       },
       {
         "id": "c72f4077-8c3c-4e64-888d-44632ab464bd",
