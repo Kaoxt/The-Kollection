@@ -32,11 +32,9 @@ jobs:
             | tr -d '\r\n' \
             | base64 --decode > /tmp/mexico.webp
 
-          make_japan_candidate() {
-            local output="$1"
-            shift
-            cat "$@" | tr -d '\r\n' | base64 --decode > "$output" 2>/dev/null
-          }
+          cat .asset-staging/world-backgrounds-final/japan.*.b64 \
+            | tr -d '\r\n' \
+            | base64 --decode > /tmp/japan.webp
 
           validate_webp() {
             python3 - "$1" <<'PY'
@@ -47,10 +45,10 @@ jobs:
           path = Path(sys.argv[1])
           data = path.read_bytes()
           if len(data) < 30 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
-              raise SystemExit(1)
+              raise SystemExit(f'{path}: invalid WebP header')
           declared = struct.unpack_from('<I', data, 4)[0] + 8
           if declared != len(data):
-              raise SystemExit(1)
+              raise SystemExit(f'{path}: invalid RIFF length')
 
           offset = 12
           width = height = None
@@ -59,7 +57,7 @@ jobs:
               size = struct.unpack_from('<I', data, offset + 4)[0]
               payload = data[offset + 8:offset + 8 + size]
               if len(payload) != size:
-                  raise SystemExit(1)
+                  raise SystemExit(f'{path}: truncated WebP chunk')
               if chunk == b'VP8X' and size >= 10:
                   width = 1 + int.from_bytes(payload[4:7], 'little')
                   height = 1 + int.from_bytes(payload[7:10], 'little')
@@ -76,33 +74,13 @@ jobs:
               offset += 8 + size + (size & 1)
 
           if (width, height) != (1683, 934):
-              raise SystemExit(1)
+              raise SystemExit(f'{path}: expected 1683x934, found {width}x{height}')
           print(f'{path}: {width}x{height}, {len(data)} bytes')
           PY
           }
 
           validate_webp /tmp/mexico.webp
-
-          japan_ok=0
-          candidates=(
-            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03.b64 .asset-staging/world-backgrounds-v2/japan.03a.b64'
-            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03.b64'
-            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03a.b64'
-            '.asset-staging/world-backgrounds-v3/japan.00.b64 .asset-staging/world-backgrounds-v3/japan.01.b64 .asset-staging/world-backgrounds-v3/japan.02.b64'
-          )
-
-          for candidate in "${candidates[@]}"; do
-            # shellcheck disable=SC2086
-            if make_japan_candidate /tmp/japan.webp $candidate && validate_webp /tmp/japan.webp; then
-              japan_ok=1
-              break
-            fi
-          done
-
-          if [[ "$japan_ok" != 1 ]]; then
-            echo 'No complete, valid staged Japan backdrop was found.' >&2
-            exit 1
-          fi
+          validate_webp /tmp/japan.webp
 
           mv /tmp/mexico.webp images/World/Mexico/backdrop.webp
           mv /tmp/japan.webp images/World/Japan/backdrop.webp
@@ -114,7 +92,8 @@ jobs:
           rm -rf \
             .asset-staging/world-backgrounds \
             .asset-staging/world-backgrounds-v2 \
-            .asset-staging/world-backgrounds-v3
+            .asset-staging/world-backgrounds-v3 \
+            .asset-staging/world-backgrounds-final
 
       - name: Commit finalized backdrops
         shell: bash
@@ -123,7 +102,8 @@ jobs:
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add images/World/Mexico/backdrop.webp images/World/Japan/backdrop.webp .asset-staging
+          git add images/World/Mexico/backdrop.webp images/World/Japan/backdrop.webp
+          git add -A .asset-staging
 
           if git diff --cached --quiet; then
             echo 'No backdrop changes to commit.'
