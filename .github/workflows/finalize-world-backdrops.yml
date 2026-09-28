@@ -1,0 +1,134 @@
+name: Finalize World Backdrops
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/finalize-world-backdrops.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and validate WebP files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p images/World/Mexico images/World/Japan
+
+          cat .asset-staging/world-backgrounds-v3/mexico.*.b64 \
+            | tr -d '\r\n' \
+            | base64 --decode > /tmp/mexico.webp
+
+          make_japan_candidate() {
+            local output="$1"
+            shift
+            cat "$@" | tr -d '\r\n' | base64 --decode > "$output" 2>/dev/null
+          }
+
+          validate_webp() {
+            python3 - "$1" <<'PY'
+          import struct
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          data = path.read_bytes()
+          if len(data) < 30 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
+              raise SystemExit(1)
+          declared = struct.unpack_from('<I', data, 4)[0] + 8
+          if declared != len(data):
+              raise SystemExit(1)
+
+          offset = 12
+          width = height = None
+          while offset + 8 <= len(data):
+              chunk = data[offset:offset + 4]
+              size = struct.unpack_from('<I', data, offset + 4)[0]
+              payload = data[offset + 8:offset + 8 + size]
+              if len(payload) != size:
+                  raise SystemExit(1)
+              if chunk == b'VP8X' and size >= 10:
+                  width = 1 + int.from_bytes(payload[4:7], 'little')
+                  height = 1 + int.from_bytes(payload[7:10], 'little')
+                  break
+              if chunk == b'VP8 ' and size >= 10 and payload[3:6] == b'\x9d\x01\x2a':
+                  width = struct.unpack_from('<H', payload, 6)[0] & 0x3fff
+                  height = struct.unpack_from('<H', payload, 8)[0] & 0x3fff
+                  break
+              if chunk == b'VP8L' and size >= 5 and payload[0] == 0x2f:
+                  bits = int.from_bytes(payload[1:5], 'little')
+                  width = 1 + (bits & 0x3fff)
+                  height = 1 + ((bits >> 14) & 0x3fff)
+                  break
+              offset += 8 + size + (size & 1)
+
+          if (width, height) != (1683, 934):
+              raise SystemExit(1)
+          print(f'{path}: {width}x{height}, {len(data)} bytes')
+          PY
+          }
+
+          validate_webp /tmp/mexico.webp
+
+          japan_ok=0
+          candidates=(
+            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03.b64 .asset-staging/world-backgrounds-v2/japan.03a.b64'
+            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03.b64'
+            '.asset-staging/world-backgrounds-v2/japan.00.b64 .asset-staging/world-backgrounds-v2/japan.01.b64 .asset-staging/world-backgrounds-v2/japan.02.b64 .asset-staging/world-backgrounds-v2/japan.03a.b64'
+            '.asset-staging/world-backgrounds-v3/japan.00.b64 .asset-staging/world-backgrounds-v3/japan.01.b64 .asset-staging/world-backgrounds-v3/japan.02.b64'
+          )
+
+          for candidate in "${candidates[@]}"; do
+            # shellcheck disable=SC2086
+            if make_japan_candidate /tmp/japan.webp $candidate && validate_webp /tmp/japan.webp; then
+              japan_ok=1
+              break
+            fi
+          done
+
+          if [[ "$japan_ok" != 1 ]]; then
+            echo 'No complete, valid staged Japan backdrop was found.' >&2
+            exit 1
+          fi
+
+          mv /tmp/mexico.webp images/World/Mexico/backdrop.webp
+          mv /tmp/japan.webp images/World/Japan/backdrop.webp
+
+          sha256sum \
+            images/World/Mexico/backdrop.webp \
+            images/World/Japan/backdrop.webp
+
+          rm -rf \
+            .asset-staging/world-backgrounds \
+            .asset-staging/world-backgrounds-v2 \
+            .asset-staging/world-backgrounds-v3
+
+      - name: Commit finalized backdrops
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add images/World/Mexico/backdrop.webp images/World/Japan/backdrop.webp .asset-staging
+
+          if git diff --cached --quiet; then
+            echo 'No backdrop changes to commit.'
+            exit 0
+          fi
+
+          git commit -m 'Add Mexico and Japan World backdrops'
+          git push origin HEAD:main
