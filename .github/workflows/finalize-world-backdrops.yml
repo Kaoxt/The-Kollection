@@ -15,6 +15,13 @@ jobs:
   finalize:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -65,6 +72,7 @@ jobs:
           data = path.read_bytes()
           if len(data) < 30 or data[:4] != b'RIFF' or data[8:12] != b'WEBP':
               raise SystemExit(f'{path}: invalid WebP header')
+
           declared = struct.unpack_from('<I', data, 4)[0] + 8
           if declared != len(data):
               raise SystemExit(f'{path}: invalid RIFF length')
@@ -122,8 +130,49 @@ jobs:
 
           if git diff --cached --quiet; then
             echo 'No backdrop changes to commit.'
-            exit 0
+          else
+            git commit -m 'Add Mexico and Japan World backdrops'
+            git push origin HEAD:main
           fi
 
-          git commit -m 'Add Mexico and Japan World backdrops'
-          git push origin HEAD:main
+      - name: Ensure AWS CLI is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v aws >/dev/null 2>&1; then
+            python3 -m pip install --user awscli
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Verify R2 configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AWS_ACCESS_KEY_ID" || (echo 'Missing R2_ACCESS_KEY_ID' && exit 1)
+          test -n "$AWS_SECRET_ACCESS_KEY" || (echo 'Missing R2_SECRET_ACCESS_KEY' && exit 1)
+          test -n "$R2_ENDPOINT" || (echo 'Missing R2_ENDPOINT' && exit 1)
+          test -n "$R2_BUCKET" || (echo 'Missing R2_BUCKET' && exit 1)
+
+      - name: Upload World backdrops to Cloudflare R2
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws s3 cp \
+            'images/World/Mexico/backdrop.webp' \
+            "s3://${R2_BUCKET}/images/World/Mexico/backdrop.webp" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --region auto \
+            --content-type 'image/webp' \
+            --cache-control 'public, max-age=2592000' \
+            --only-show-errors
+
+          aws s3 cp \
+            'images/World/Japan/backdrop.webp' \
+            "s3://${R2_BUCKET}/images/World/Japan/backdrop.webp" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --region auto \
+            --content-type 'image/webp' \
+            --cache-control 'public, max-age=2592000' \
+            --only-show-errors
+
+          echo 'Published Mexico and Japan backdrops to R2.'
