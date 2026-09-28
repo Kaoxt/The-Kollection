@@ -28,13 +28,32 @@ jobs:
 
           mkdir -p images/World/Mexico images/World/Japan
 
-          cat .asset-staging/world-backgrounds-v3/mexico.*.b64 \
+          cat \
+            .asset-staging/world-backgrounds-v3/mexico.00.b64 \
+            .asset-staging/world-backgrounds-v3/mexico.01.b64 \
+            .asset-staging/world-backgrounds-v3/mexico.02.b64 \
+            .asset-staging/world-backgrounds-v3/mexico.03.b64 \
+            .asset-staging/world-backgrounds-v3/mexico.04.b64 \
+            .asset-staging/world-backgrounds-v3/mexico.05.b64 \
             | tr -d '\r\n' \
             | base64 --decode > /tmp/mexico.webp
 
-          cat .asset-staging/world-backgrounds-final/japan.*.b64 \
+          cat \
+            .asset-staging/world-backgrounds-final/japan.00.b64 \
+            .asset-staging/world-backgrounds-final/japan.00a.b64 \
+            .asset-staging/world-backgrounds-final/japan.00b.b64 \
+            .asset-staging/world-backgrounds-final/japan.01.b64 \
+            .asset-staging/world-backgrounds-final/japan.02.b64 \
+            .asset-staging/world-backgrounds-final/japan.03.b64 \
+            .asset-staging/world-backgrounds-final/japan.04.b64 \
+            .asset-staging/world-backgrounds-final/japan.04a.b64 \
+            .asset-staging/world-backgrounds-final/japan.04b.b64 \
+            .asset-staging/world-backgrounds-final/japan.05.b64 \
             | tr -d '\r\n' \
             | base64 --decode > /tmp/japan.webp
+
+          echo '39232134bdf941b1e838a469684dff2637892e94beb94ab7850983e45499a4e7  /tmp/mexico.webp' | sha256sum --check
+          echo '0f94e334176562a677671265301f09d6efafdb966a3f6afd2dfde23bdb4dfb38  /tmp/japan.webp' | sha256sum --check
 
           validate_webp() {
             python3 - "$1" <<'PY'
@@ -84,10 +103,6 @@ jobs:
 
           mv /tmp/mexico.webp images/World/Mexico/backdrop.webp
           mv /tmp/japan.webp images/World/Japan/backdrop.webp
-
-          sha256sum \
-            images/World/Mexico/backdrop.webp \
-            images/World/Japan/backdrop.webp
 
           rm -rf \
             .asset-staging/world-backgrounds \
